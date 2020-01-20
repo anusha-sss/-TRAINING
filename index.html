@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="HandheldFriendly" content="true">
+
+    <link rel="stylesheet" href="index.css">
+    <title>Mongoose v5.8.7: Document</title>
+</head>
+<body>
+
+    
+        
+            
+            <div id="logo-container">
+                <div class="logo">
+                    <a href="#">
+                    <img src="pic.png" id="logo"> 
+                    <span class="mangoose">  mongoose</span>
+                    </a>
+                </div>
+
+             </div>
+        </div>
+    
+
+
+
+   
+    
+<div id="container">    
+<h2>Documents</h2>
+<div>
+    <p>Mongoose <a href="#" class="blueword">documents</a> represent a one-to-one mapping to documents as stored in MongoDB. Each document is an instance of its <a href="#" class="blueword">Model</a>.</p>
+</div>
+<ul >
+    <li><a href="#" class="blueword">Documents vs Models</a></li>
+    <li><a href="#" class="blueword">Retrieving</a></li>
+    <li><a href="#" class="blueword">Updating</a></li>
+    <li><a href="#" class="blueword">Validating</a></li>
+    <li><a href="#" class="blueword">Overwriting</a></li>
+</ul>
+
+
+<h3>Documents vs Models</h3>
+    <div>
+        <p><a href="#" class="blueword">Documents</a> and <a href="#" class="blueword">Model</a>  are distinct classes in Mongoose. The Model class is a subclass of the Document class. When you use the <a href="#" class="blueword">Model constructor</a>, you create a new document.</p>
+            <div class="box">
+                <strong> const</strong> MyModel = mongoose.model('Test', <strong>new </strong> Schema({ name: <span class="okblue">String</span>  })); <br>
+                <strong> const</strong> doc =  <strong>new </strong> MyModel(); <br> <br>
+
+                doc <strong>instanceof</strong>  MyModel; <span class="comment" > <i>// true</i> </span>  <br>
+                doc <strong>instanceof</strong>  mongoose.Model; <span class="comment" > <i>// true</i></span>  <br>
+                doc <strong>instanceof</strong>  mongoose.Document; <span class="comment" > <i>// true</i></span>  <br>
+            </div>
+        <p>In Mongoose, a "document" generally means an instance of a model. You should not have to create an instance of the Document class without going through a model.</p>
+    </div>
+
+
+
+<h3>Retrieving</h3>
+    <p>When you load documents from MongoDB using model functions like <span class="highlight">findOne()</span> , you get a Mongoose document back.</p>
+        <div class="box">
+            <strong> const</strong>doc = <strong>await</strong> MyModel.findOne(); <br> <br>
+
+            doc <strong>instanceof</strong> MyModel; // true <br>
+            doc <strong>instanceof</strong> mongoose.Model; // true <br>
+            doc <strong>instanceof</strong> mongoose.Document; // true <br>
+         </div>
+
+
+<h3>Updating</h3>
+    <p>Mongoose documents track changes. You can modify a document using vanilla JavaScript assignments and Mongoose will convert it into <a href="#" class="blueword">MongoDB update operators</a>.</p>
+        <div class="box">
+        <span class="extra">
+
+            doc.name = <span class="highlight">'foo'</span> ; <br><br>
+
+            <span class="comment"> <i> // Mongoose sends a `updateOne({ _id: doc._id }, { $set: { name: 'foo' } })` <br>
+            // to MongoDB.</i></span> <br>
+             <strong>await</strong>  doc.save(); <br>
+         </span>
+        </div>
+    
+    <p>If the document with the corresponding <span class="highlight">_id</span>  is not found, Mongoose will report a <span class="highlight">DocumentNotFoundError</span> :</p>
+    
+    <div class="box">
+      
+        <strong>const</strong> doc = <strong>await</strong>  MyModel.findOne(); <br><br>
+
+         <span class="comment"> <i>// Delete the document so Mongoose won't be able to save changes</i> </span><br>
+         <strong>await</strong> MyModel.deleteOne({ _id: doc._id });<br><br>
+
+        doc.name = <span class="highlight">'foo'</span> ;
+        <strong>await</strong> doc.save(); <span class="comment"> <i>//Throws DocumentNotFoundError</i> </span>
+    </div>
+    <p>The <span class="highlight">save()</span>  function is generally the right way to update a document with Mongoose. With <span class="highlight">save()</span> , you get full <a href="#" class="blueword">validation </a> and <a href="#" class="blueword">middleware</a> .</p>
+    <p>For cases when <span class="highlight">save()</span>  isn't flexible enough, Mongoose lets you create your own <a href="#" class="blueword">MongoDB updates</a>  with casting, middleware, and <a href="#" class="blueword">limited validation</a> .</p>
+    <div class="box">
+        <span class="comment"> <i> // Update all documents in the `mymodels` collection</i></span> <br>
+        <strong>await</strong>  MyModel.updateMany({}, { $set: { name: <span class="highlight">'foo'</span>  } });
+    </div>
+    <p>Note that <span class="highlight">update()</span> , <span class="highlight">updateMany()()</span>, <span class="highlight">findOneAndUpdate()</span> etc. do not execute  <span class="highlight">save()</span> middleware. If you need save middleware and full validation, first query for the document and then  <span class="highlight">save()</span>  save() it.</p>
+
+    
+
+<h3>Validating</h3>
+    <p>Documents are casted validated before they are saved. Mongoose first casts values to the specified type and then validates them. Internally, Mongoose calls the document's <span class="highlight">validate()</span> <a href="#" class="blueword">method</a> before saving.</p>
+    <div class="box">
+        <strong>const</strong> schema = new Schema({ name: <span class="okblue">String</span> , age: { type: <span class="okblue">Number</span> , min: <span class="okgreen">0</span>  } }); <br>
+        <strong>const</strong> Person = mongoose.model( <span class="okred">'Person'</span> , schema);<br> <br>
+        
+        <strong>let</strong>  p = new Person({ name: <span class="okred">'foo'</span> , age: <span class="okred">'bar'</span>  }); <br>
+        <span class="comment"> <i>// Cast to Number failed for value "bar" at path "age"</i></span> <br>
+        <strong>await</strong> p.validate();<br> <br>
+        
+        <strong>let</strong> p2 = new Person({ name: <span class="okred">'foo'</span> , age: <span></span> -1 }); <br>
+        <span class="comment"><i>// Path `age` (-1) is less than minimum allowed value (0).</i></span> <br> 
+        <strong>await</strong> p2.validate();
+    </div>
+ 
+ 
+<h3>Overwriting</h3>
+    <p>There are 2 different ways to overwrite a document (replacing all keys in the document). One way is to use the <span class="highlight">Document#overwrite()</span>  <a href="#" class="blueword">function</a>  followed by <span class="highlight">save()</span> .</p>
+    <div class="box">
+         <span class="comment"> <i>// Sets `name` and unsets all other properties</i></span>  <br>
+         <strong>await</strong>  Person.replaceOne({ _id }, { name: <span class="okred">'Jean-Luc Picard'</span>  });
+    </div> 
+    
+    
+<h3>Next Up</h3>
+    <p>Now that we've covered Documents, let's take a look at <a href="#" class="blueword">Subdocuments</a>.</p>
+
+</div> 
+                
+     
+            
+    
+    
+</body>
+</html>
