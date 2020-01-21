@@ -1,0 +1,39 @@
+
+
+.darkmode{
+    background: black !important;
+    color: white !important;
+    max-width: 800px;
+    margin: auto;
+    padding: 10px;
+}
+
+
+
+
+.container{
+        max-width: 800px;
+        margin: auto;
+        background: white;
+        color: black;
+        padding: 10px;
+      
+}
+
+
+.heading{
+    text-align: center;
+    height: 40px;
+    font-family: 'Abril Fatface', cursive;
+    font-size: 50px;
+}
+
+
+
+.list{
+    list-style-type: circle;
+    list-style-type: none;
+    text-decoration: none;
+    text-decoration-color: black;
+
+}
